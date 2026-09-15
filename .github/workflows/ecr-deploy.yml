@@ -56,6 +56,9 @@ jobs:
         script: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker stop simplewebsite || true
-          docker rm simplewebsite || true
+          
+          # Stop all running containers to free up port 80
+          docker ps -q | xargs -r docker stop || true
+          docker ps -aq | xargs -r docker rm || true
+          
           docker run -d --name simplewebsite -p 80:80 $ECR_REGISTRY/$ECR_REPOSITORY:latest
